@@ -1,0 +1,1 @@
+{"_note": "Seed roles — mirrors ROLE_COLS in src/lib/data.js. Generated for NestJS seeding; edit here and re-import.","roles": ["SUPER_ADMIN", "MINISTRY_ADMIN", "APPROVER", "UNIT_HEAD", "SECTION_HEAD", "STAFF", "FINANCE_OFFICER", "EXTERNAL", "VIEWER", "AUDITOR", "SYSTEM"]}

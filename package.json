@@ -2,21 +2,28 @@
   "name": "wmams",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": "20.x || 22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "node --no-warnings scripts/seed.mjs --replace"
   },
   "dependencies": {
+    "mongoose": "8.9.5",
     "next": "16.3.7",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
+    "@tailwindcss/postcss": "4.3.3",
+    "eslint": "9.39.5",
     "eslint-config-next": "16.3.7",
-    "tailwindcss": "^4"
+    "mongodb-memory-server": "10.1.4",
+    "tailwindcss": "4.3.3"
   }
 }

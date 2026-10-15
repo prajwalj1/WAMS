@@ -1,0 +1,75 @@
+# WMAMS local dev stack: Mongo (single-node replica set for transactions),
+# Redis, MinIO, ClamAV, Mailpit. Mirrors §26 docker-compose.dev.yml.
+# Usage: docker compose -f infra/docker/docker-compose.dev.yml up -d
+name: wmams-dev
+
+services:
+  mongo:
+    image: mongo:7
+    command: ["--replset", "rs0", "--bind_ip_all"]
+    ports: ["27017:27017"]
+    volumes: ["mongo-data:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      mongo:
+        condition: service_healthy
+    # Initiates single-node rs + creates least-privilege app user (dev only).
+    command: >
+      mongosh --host mongo:27017 --quiet --eval
+      "try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }) } catch (e) { print(e.message) };
+       db.getSiblingDB('wmams').createUser({ user: 'app', pwd: 'devpasswordchange', roles: [{ role: 'readWrite', db: 'wmams' }] })"
+    restart: "no"
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    volumes: ["redis-data:/data"]
+    command: ["redis-server", "--appendonly", "yes"]
+
+  minio:
+    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000", "9001:9001"]
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-change-me
+    volumes: ["minio-data:/data"]
+    healthcheck:
+      test: ["CMD", "mc", "--version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  minio-init:
+    image: minio/mc:RELEASE.2024-12-13T22-19-12Z
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 minioadmin minioadmin-change-me;
+      mc mb --ignore-existing local/wmams-docs local/wmams-quarantine local/wmams-reports;
+      mc version enable local/wmams-docs;
+      mc ilm rule add --expire-days 7 local/wmams-reports;
+      echo buckets-ready"
+
+  clamav:
+    image: clamav/clamav:stable
+    ports: ["3310:3310"]
+
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports: ["8025:8025", "1025:1025"]
+
+volumes:
+  mongo-data:
+  redis-data:
+  minio-data:

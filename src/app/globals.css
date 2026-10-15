@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
+@theme {
+  --color-nepal-crimson: #dc143c;
+  --color-nepal-blue: #003893;
+  --color-nepal-gold: #c9a227;
+  --font-sans: "Mukta", "Noto Sans Devanagari", system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f1f5f9;
+  --foreground: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { scroll-behavior: smooth; }
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Mukta", "Noto Sans Devanagari", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* thin scrollbars for tables */
+.nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+
+/* 360px phones: no sideways scroll; tables scroll inside .nice-scroll */
+html, body { max-width: 100%; overflow-x: clip; }
+img, svg, video, canvas { max-width: 100%; height: auto; }
+img[src="/images/logo.png"] { height: auto; }
+
+/* Gov masthead emblem: crisp on hidpi, never stretched */
+.gov-emblem { image-rendering: auto; object-fit: contain; }
+
+input, select, textarea { font-size: 16px; max-width: 100%; }
+@media (min-width: 640px) {
+  input, select, textarea { font-size: inherit; }
+}
+
+/* Small phones: tighten layout so sidebar content + KPI cards fit 360px */
+@media (max-width: 419px) {
+  main#main { font-size: 14px; }
+}
+
+/* print for reports */
+@media print {
+  .no-print { display: none !important; }
+}
+
+/* ── System motion (transform/opacity only — cheap, gov-sober) ─────────── */
+@keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes toastIn { from { opacity: 0; transform: translateX(24px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes popIn { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes drawerIn { from { opacity: .4; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+@keyframes skimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* Every route change replays on the fresh page root inside Shell's <main>. */
+.anim-page > * { animation: pageIn .28s ease both; }
+.anim-page > *:nth-child(2) { animation-delay: .04s; }
+.anim-page > *:nth-child(3) { animation-delay: .08s; }
+.anim-page > *:nth-child(4) { animation-delay: .12s; }
+.anim-page > *:nth-child(5) { animation-delay: .16s; }
+.anim-card { animation: cardIn .3s ease both; }
+.anim-toast { animation: toastIn .25s cubic-bezier(.2, .9, .3, 1.15) both; }
+.anim-pop { animation: popIn .16s ease both; }
+.anim-drawer { animation: drawerIn .22s ease both; }
+
+/* Micro-interactions everywhere. */
+button, a, input, select, textarea { transition: color .15s ease, background-color .15s ease, border-color .15s ease, transform .12s ease, box-shadow .15s ease; }
+button:active { transform: scale(.97); }
+table tbody tr { transition: background-color .15s ease; }
+
+/* Loading skeleton bars. */
+.skel { position: relative; overflow: hidden; background: #e2e8f0; border-radius: .5rem; }
+.skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .75), transparent); animation: skimmer 1.4s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  .anim-page > *, .anim-card, .anim-toast, .anim-pop, .skel::after { animation: none !important; }
 }
